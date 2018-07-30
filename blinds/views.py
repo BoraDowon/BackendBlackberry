@@ -44,6 +44,8 @@ class BlindDetail(APIView):
 
 
 class BlindList(APIView):
+    lookup_board_kwarg = 'board_id'
+
     def get(self, request: HttpRequest, board_id: int):
         """
         해당 게시판 ID의 전체 게시글 리스트 조회
@@ -54,7 +56,21 @@ class BlindList(APIView):
 
         return Response({'msg': 'success'})
 
+    def post(self, request: HttpRequest, board_id: int):
+        """
+        해당 게시판 ID의 전체 게시글 작성
+        :param request: 
+        :param board_id: 
+        :return: 
+        """
+        data = JSONParser().parse(request)
+        title = data['title']
+        body = data['body']
+        data[self.lookup_board_kwarg] = board_id
+        print(data)
+        return Response({'msg': 'success'})
 
+'''
 class BlindCreateArticle(APIView):
     schema = ManualSchema(
         description='해당 게시판 ID의 전체 게시글 작성',
@@ -62,13 +78,4 @@ class BlindCreateArticle(APIView):
             coreapi.Field("content_body", required=True, location="body", schema=coreschema.String()),
             coreapi.Field("board_id", required=True, location="path", schema=coreschema.Integer()),
         ])
-
-    lookup_board_kwarg = 'board_id'
-
-    def post(self, request: HttpRequest, board_id: int):
-        data = JSONParser().parse(request)
-        title = data['title']
-        body = data['body']
-        data[self.lookup_board_kwarg] = board_id
-        print(data)
-        return Response({'msg': 'success'})
+'''
