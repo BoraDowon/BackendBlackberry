@@ -1,81 +1,39 @@
 from django.http import HttpRequest
 
-from rest_framework.views import APIView
-from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from rest_framework.schemas import ManualSchema
+from rest_framework import mixins
+from rest_framework import generics
 
-import coreapi, coreschema
+from blinds.models import Article
+from blinds.serializers import ArticleSerializer
 
 
-class BlindDetail(APIView):
+class BlindList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+    lookup_url_kwarg = 'board_id'
 
-    def get(self, request: HttpRequest, board_id: int, article_id: int):
+    def get(self, request: HttpRequest, *args, **kwargs):
         """
-        해당 게시판 ID에서 요청된 게시글 세부 정보 조회
+        해당 게시판 ID의 전체 게시글 조회
         :param request:
-        :param board_id:
-        :param article_id:
+        :param args:
+        :param kwargs:
         :return:
         """
+        return self.list(request, *args, **kwargs)
 
-        return Response({'msg': 'success'})
-
-    def put(self, request: HttpRequest, board_id: int, article_id: int):
+    def post(self, request: HttpRequest, *args, **kwargs):
         """
-        해당 게시판 ID에서 요청된 게시글 편집
+        해당 게시판 ID의 게시글 작성
         :param request:
-        :param board_id:
-        :param article_id:
+        :param args:
+        :param kwargs:
         :return:
         """
-
-        return Response({'msg': 'success'})
-
-    def delete(self, request: HttpRequest, board_id: int, article_id: int):
-        """
-        해당 게시판 ID에서 요청된 게시글 삭제
-        :param request:
-        :param board_id:
-        :param article_id:
-        :return:
-        """
-        return Response({'msg': 'success'})
-
-
-class BlindList(APIView):
-    lookup_board_kwarg = 'board_id'
-
-    def get(self, request: HttpRequest, board_id: int):
-        """
-        해당 게시판 ID의 전체 게시글 리스트 조회
-        :param request:
-        :param board_id:
-        :return:
-        """
-
-        return Response({'msg': 'success'})
-
-    def post(self, request: HttpRequest, board_id: int):
-        """
-        해당 게시판 ID의 전체 게시글 작성
-        :param request: 
-        :param board_id: 
-        :return: 
-        """
-        data = JSONParser().parse(request)
-        title = data['title']
-        body = data['body']
-        data[self.lookup_board_kwarg] = board_id
-        print(data)
-        return Response({'msg': 'success'})
-
-'''
-class BlindCreateArticle(APIView):
-    schema = ManualSchema(
-        description='해당 게시판 ID의 전체 게시글 작성',
-        fields=[
-            coreapi.Field("content_body", required=True, location="body", schema=coreschema.String()),
-            coreapi.Field("board_id", required=True, location="path", schema=coreschema.Integer()),
-        ])
-'''
+        print(kwargs)
+        print(request.data)
+        if kwargs[self.lookup_url_kwarg] == request.data[self.lookup_url_kwarg]:
+            return self.create(request, *args, **kwargs)
+        else:
+            return Response({'msg': 'invalid board_id'})
