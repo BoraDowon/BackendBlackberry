@@ -1,4 +1,5 @@
 from django.http import HttpRequest
+from django.shortcuts import get_object_or_404
 
 from rest_framework import status
 from rest_framework import mixins
@@ -76,7 +77,13 @@ class BlindDetail(mixins.RetrieveModelMixin,
         :param kwargs:
         :return:
         """
-        return self.destroy(request, *args, **kwargs)
+        # code snippet for deleting an article
+        instance = Article.objects.get(id=kwargs['article_id'])
+        instance.status = '6deleted'
+        instance.save()
+        serializer = ArticleSerializer(instance)
+
+        return Response({'msg': 'success', 'data': serializer.data})
 
 
 class BlindList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
@@ -92,7 +99,21 @@ class BlindList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Generic
         :param kwargs:
         :return:
         """
-        return self.list(request, *args, **kwargs)
+        # code snippet for deleting an article
+        instance = Article.objects.all()
+
+        serializer = ArticleSerializer(instance, many=True)
+
+        import json
+        s_dumps = json.dumps(serializer.data)
+        s_json_list = json.loads(s_dumps)
+        output_list = list()
+        for s_json in s_json_list:
+            if s_json['status'] != '6deleted':
+                del s_json['body']
+                output_list.append(s_json)
+
+        return Response({'msg': 'success', 'data': output_list})
 
     def post(self, request: HttpRequest, *args, **kwargs):
         """
@@ -115,6 +136,11 @@ class BlindArticleLike(mixins.UpdateModelMixin, generics.GenericAPIView):
     serializer_class = ArticleSerializer
     lookup_url_kwarg = 'article_id'
 
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset)
+        return obj
+
     def put(self, request: HttpRequest, *args: tuple, **kwargs: dict):
         """
         해당 게시글을 좋아요 선택
@@ -123,7 +149,11 @@ class BlindArticleLike(mixins.UpdateModelMixin, generics.GenericAPIView):
         :param kwargs:
         :return:
         """
-        return self.update(request, *args, **kwargs)
+        instance = Article.objects.get(id=kwargs['article_id'])
+        serializer = ArticleSerializer(instance)
+        print(serializer.data)
+        return Response({'msg': 'success'})
+        #return self.update(request, *args, **kwargs)
 
 
 class BlindArticleReport(mixins.UpdateModelMixin, generics.GenericAPIView):
