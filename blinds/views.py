@@ -1,8 +1,10 @@
 from django.http import HttpRequest
 
-from rest_framework.response import Response
+from rest_framework import status
 from rest_framework import mixins
 from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from blinds.models import Article
 from blinds.models import Comment
@@ -106,3 +108,51 @@ class BlindList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Generic
             return self.create(request, *args, **kwargs)
         else:
             return Response({'msg': 'invalid board_id'})
+
+
+class BlindArticleLike(mixins.UpdateModelMixin, generics.GenericAPIView):
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+    lookup_url_kwarg = 'article_id'
+
+    def put(self, request: HttpRequest, *args: tuple, **kwargs: dict):
+        """
+        해당 게시글을 좋아요 선택
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        return self.update(request, *args, **kwargs)
+
+
+class BlindArticleReport(mixins.UpdateModelMixin, generics.GenericAPIView):
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+    lookup_url_kwarg = 'article_id'
+
+    def put(self, request: HttpRequest, *args: tuple, **kwargs: dict):
+        """
+        해당 게시글을 신고
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        return self.update(request, *args, **kwargs)
+
+
+class BlindArticleBookmark(mixins.UpdateModelMixin, generics.GenericAPIView):
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
+    lookup_url_kwarg = 'article_id'
+
+    def put(self, request: HttpRequest, *args: tuple, **kwargs: dict):
+        """
+        해당 게시글을 북마크
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        return self.update(request, *args, **kwargs)
