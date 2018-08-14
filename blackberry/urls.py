@@ -19,6 +19,7 @@ from rest_framework_swagger.views import get_swagger_view
 
 urlpatterns = [
     path('api/', include('blinds.urls')),
+    path('api/', include('accounts.urls')),
     path('api/', get_swagger_view(title='Blackberry API')),
     path('admin/', admin.site.urls),
 ]
